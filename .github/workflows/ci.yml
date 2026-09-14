@@ -25,6 +25,10 @@ jobs:
           - macos-latest
           - windows-latest
     steps:
+      - name: Preserve LF line endings
+        shell: bash
+        run: git config --global core.autocrlf false
+
       - name: Check out
         uses: actions/checkout@v6
 
