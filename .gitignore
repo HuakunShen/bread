@@ -1,0 +1,7 @@
+/bread
+/bin/
+*.cover
+coverage.out
+.DS_Store
+.idea/
+.vscode/
