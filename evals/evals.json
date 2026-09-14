@@ -1,0 +1,20 @@
+{
+  "skill_name": "efficient-codebase-navigation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to understand how request parsing connects to JSON rendering in this Go repository. The relevant files are already known: internal/read/request.go, internal/read/render.go, and cmd/bread/main.go. Inspect the smallest useful ranges and summarize the data flow before I edit anything.",
+      "expected_output": "The agent batches the three known independent reads in one bread invocation or one parallel tool turn, uses focused ranges, preserves the file relationships, and then summarizes the data flow without issuing sequential one-file reads."
+    },
+    {
+      "id": 2,
+      "prompt": "Find where the repository handles invalid UTF-8 files and then explain how that error reaches the CLI exit status. I do not know the file names yet, so start from the codebase and investigate what needs to be read.",
+      "expected_output": "The agent searches first because the targets are unknown, then batches the relevant implementation and CLI/test context once the paths are known; it does not pretend bread can discover unknown files."
+    },
+    {
+      "id": 3,
+      "prompt": "Open the parser for this configuration format. After seeing the parser, determine which exact branch handles a legacy field and read only the corresponding test. The second target depends on the first result.",
+      "expected_output": "The agent reads the parser first and then the dependent test sequentially, explaining that batching would be wrong because the first result determines the second target."
+    }
+  ]
+}
