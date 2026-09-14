@@ -47,7 +47,7 @@ try {
     if (-not $checksumLine) {
         throw "bread installer: checksum entry not found for $asset"
     }
-    $expected = $Matches[1].ToLowerInvariant()
+    $expected = [regex]::Match($checksumLine, $pattern).Groups[1].Value.ToLowerInvariant()
     $actual = (Get-FileHash -Algorithm SHA256 -Path $archivePath).Hash.ToLowerInvariant()
     if ($actual -ne $expected) {
         throw "bread installer: checksum verification failed"
@@ -65,3 +65,4 @@ try {
 finally {
     Remove-Item -Recurse -Force $temporaryDirectory -ErrorAction SilentlyContinue
 }
+

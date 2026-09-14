@@ -42,24 +42,28 @@ class Bread < Formula
   version "$version"
   license "MIT"
 
-  on_macos do
+  if OS.mac?
     if Hardware::CPU.arm?
       url "https://github.com/$repository/releases/download/v$version/bread_${version}_darwin_arm64.tar.gz"
       sha256 "$darwin_arm64"
-    else
+    elsif Hardware::CPU.intel?
       url "https://github.com/$repository/releases/download/v$version/bread_${version}_darwin_amd64.tar.gz"
       sha256 "$darwin_amd64"
+    else
+      raise "Unsupported macOS architecture"
     end
-  end
-
-  on_linux do
+  elsif OS.linux?
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
       url "https://github.com/$repository/releases/download/v$version/bread_${version}_linux_arm64.tar.gz"
       sha256 "$linux_arm64"
-    else
+    elsif Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
       url "https://github.com/$repository/releases/download/v$version/bread_${version}_linux_amd64.tar.gz"
       sha256 "$linux_amd64"
+    else
+      raise "Unsupported Linux architecture"
     end
+  else
+    raise "Unsupported operating system"
   end
 
   def install
