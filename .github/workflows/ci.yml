@@ -37,7 +37,11 @@ jobs:
       - name: Check formatting
         shell: bash
         run: |
-          test -z "$(gofmt -l .)"
+          formatted="$(gofmt -l .)"
+          if [ -n "$formatted" ]; then
+            printf 'Files needing gofmt:\n%s\n' "$formatted"
+            exit 1
+          fi
 
       - name: Run vet
         run: go vet ./...
