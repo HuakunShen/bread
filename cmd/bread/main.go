@@ -9,16 +9,20 @@ import (
 	"io"
 	"os"
 
-	"bread/internal/read"
+	"github.com/HuakunShen/bread/internal/read"
+	"github.com/HuakunShen/bread/internal/update"
+	appversion "github.com/HuakunShen/bread/internal/version"
 )
-
-const version = "0.1.0"
 
 func main() {
 	os.Exit(run(context.Background(), os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
 }
 
 func run(ctx context.Context, args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
+	if len(args) > 0 && args[0] == "upgrade" {
+		return runUpgrade(ctx, args[1:], stdout, stderr)
+	}
+
 	flags := flag.NewFlagSet("bread", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	format := flags.String("format", "text", "output format: text or json")
@@ -32,7 +36,7 @@ func run(ctx context.Context, args []string, stdin io.Reader, stdout io.Writer, 
 		return 2
 	}
 	if *showVersion {
-		_, _ = fmt.Fprintf(stdout, "bread %s\n", version)
+		_, _ = fmt.Fprintf(stdout, "bread %s\n", appversion.Value)
 		return 0
 	}
 	if *format != "text" && *format != "json" {
@@ -66,6 +70,43 @@ func run(ctx context.Context, args []string, stdin io.Reader, stdout io.Writer, 
 		if result.Error != "" {
 			return 1
 		}
+	}
+	return 0
+}
+
+func runUpgrade(ctx context.Context, args []string, stdout io.Writer, stderr io.Writer) int {
+	flags := flag.NewFlagSet("bread upgrade", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	checkOnly := flags.Bool("check", false, "check for an update without changing the executable")
+	repository := os.Getenv("BREAD_RELEASE_REPOSITORY")
+	if repository == "" {
+		repository = appversion.Repository
+	}
+	repositoryFlag := flags.String("repository", repository, "GitHub repository in OWNER/NAME form")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	if flags.NArg() != 0 {
+		_, _ = fmt.Fprintln(stderr, "bread upgrade: unexpected positional arguments")
+		return 2
+	}
+	client := update.NewClient(*repositoryFlag, appversion.Value)
+	if *checkOnly {
+		info, err := client.Check(ctx)
+		if err != nil {
+			_, _ = fmt.Fprintf(stderr, "bread upgrade: %s\n", err)
+			return 1
+		}
+		if info.Available {
+			_, _ = fmt.Fprintf(stdout, "update available: %s -> %s\n", info.Current, info.Latest)
+		} else {
+			_, _ = fmt.Fprintf(stdout, "bread is up to date (%s)\n", info.Latest)
+		}
+		return 0
+	}
+	if err := client.Upgrade(ctx, stdout); err != nil {
+		_, _ = fmt.Fprintf(stderr, "bread upgrade: %s\n", err)
+		return 1
 	}
 	return 0
 }
