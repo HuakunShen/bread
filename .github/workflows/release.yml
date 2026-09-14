@@ -37,14 +37,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate Homebrew formula
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: VERSION="${GITHUB_REF_NAME#v}" ./scripts/generate-homebrew-formula.sh
+
       - name: Upload generated Homebrew formula
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          formula="$(find dist -type f -name 'bread.rb' -print -quit)"
-          if [ -n "$formula" ]; then
-            gh release upload "$GITHUB_REF_NAME" "$formula#bread.rb" --repo "$GITHUB_REPOSITORY" --clobber
-          else
-            echo "No generated Homebrew formula found; release remains valid."
-          fi
+          gh release upload "$GITHUB_REF_NAME" "dist/bread.rb#bread.rb" --repo "$GITHUB_REPOSITORY" --clobber
