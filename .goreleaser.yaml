@@ -55,8 +55,9 @@ changelog:
       - "^test:"
       - "^chore:"
 
-# Generate a tap formula into dist. The release workflow can upload it as an
-# asset and an owner-authorized tap workflow can publish it separately.
+# Generate a tap formula into dist. The release workflow uploads it as an
+# asset; the optional Homebrew workflow then copies that exact formula to the
+# external tap with a separately scoped token.
 brews:
   - name: bread
     ids:
@@ -65,4 +66,8 @@ brews:
     homepage: https://github.com/HuakunShen/bread
     description: Bounded batch file reader for coding agents
     license: MIT
+    repository:
+      owner: HuakunShen
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     skip_upload: true
