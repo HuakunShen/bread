@@ -492,8 +492,10 @@ func scheduleWindowsReplacement(candidate, target, temporaryDirectory string) er
 	if err := os.WriteFile(scriptPath, []byte(script), 0o600); err != nil {
 		return fmt.Errorf("write Windows upgrade helper: %w", err)
 	}
-	commandLine := fmt.Sprintf("call \"%s\" & if not errorlevel 1 rmdir /S /Q \"%s\"", scriptPath, temporaryDirectory)
-	command := exec.Command("cmd.exe", "/D", "/C", commandLine)
+	// Pass the command after /C as separate arguments. If the entire command
+	// string is passed as one argument, os/exec quotes it for CreateProcess and
+	// cmd.exe receives the surrounding quotes literally on Windows.
+	command := exec.Command("cmd.exe", "/D", "/C", "call", scriptPath, "&", "if", "not", "errorlevel", "1", "rmdir", "/S", "/Q", temporaryDirectory)
 	command.Stdout = os.Stderr
 	command.Stderr = os.Stderr
 	if err := command.Start(); err != nil {
