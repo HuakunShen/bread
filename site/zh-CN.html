@@ -17,7 +17,7 @@
   <section class="hero"><div class="eyebrow">Agent infrastructure · Go · MIT</div><h1>bread</h1><p class="lead">把已经知道的多个文件或代码行范围，在一次有界、可复现的结果中读取出来。并行文件 I/O、稳定输出顺序、JSON、校验和，以及跨平台 Release。</p><div class="actions"><a class="button" href="https://github.com/HuakunShen/bread/releases/latest">下载最新版本</a><a class="button secondary" href="index.html">English</a></div></section>
   <h2>安装</h2><pre><code>go install github.com/HuakunShen/bread/cmd/bread@latest
 curl -fsSL https://raw.githubusercontent.com/HuakunShen/bread/main/install.sh | bash
-brew tap HuakunShen/tap &amp;&amp; brew install bread</code></pre>
+brew install HuakunShen/tap/bread</code></pre>
   <div class="grid"><div class="card"><strong>减少回合</strong><p class="muted">把独立文件放进一次 batch，避免每个文件都触发一次模型往返。</p></div><div class="card"><strong>有界读取</strong><p class="muted">用行范围和总字节上限控制上下文，不把整个仓库倾倒给模型。</p></div><div class="card"><strong>任意 Agent</strong><p class="muted">Codex、Claude Code、OpenCode 或普通终端都可以调用。</p></div></div>
   <h2>原则</h2><pre><code>不知道路径   → 先搜索
 知道一个文件 → 正常读取

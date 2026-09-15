@@ -56,8 +56,18 @@ irm https://raw.githubusercontent.com/HuakunShen/bread/main/install.ps1 | iex
 
 ### Homebrew
 
+推荐使用 fully-qualified formula：
+
+```bash
+brew install HuakunShen/tap/bread
+```
+
+这个命令会自动添加 `HuakunShen/tap`，并只信任 `bread` 这个 formula。
+如果你的 Homebrew 要求显式信任，使用：
+
 ```bash
 brew tap HuakunShen/tap
+brew trust --formula HuakunShen/tap/bread
 brew install bread
 ```
 
@@ -156,12 +166,16 @@ GitHub Actions；之后 push 到 `main` 会自动部署。
 
 ### Homebrew 自动更新
 
-Homebrew workflow 默认不运行，避免未授权地写入其它仓库。维护者需要：
+本仓库当前已启用 Homebrew workflow。每次 Release 发布后，它会把 release
+中的 `bread.rb` 同步到 `HuakunShen/homebrew-tap`。token 只需要对 tap 有
+Contents 写权限，不需要读取 `bread` repo。
+
+Fork 本仓库时，只有在配置好以下内容后才应启用 workflow：
 
 1. 创建公开的 `HuakunShen/homebrew-tap`；
 2. 添加仓库变量 `HOMEBREW_TAP_ENABLED=true`；
 3. 添加只对 tap 有写权限的 `HOMEBREW_TAP_TOKEN` secret；
-4. 发布一个 Release，确认公式通过 `brew audit` 和安装测试。
+4. 发布一个 Release，确认公式通过安装测试。
 
 ## 7. 本地验证
 
@@ -191,7 +205,7 @@ GOOS=windows GOARCH=arm64 go build ./cmd/bread
 - checksum 不匹配：停止安装，不要跳过校验；
 - 没有对应 archive：当前版本尚未发布该平台/架构；
 - Windows 升级未立即变化：关闭当前进程后重新启动；
-- Homebrew 找不到公式：先运行 `brew tap HuakunShen/tap`。
+- Homebrew 找不到公式：优先运行 `brew install HuakunShen/tap/bread`；如果已经手动 tap，则运行 `brew trust --formula HuakunShen/tap/bread` 后再安装。
 
 当前 bread 是本地文件 batch reader，不是 MCP server、AST/LSP 服务、远程文件系统
 或编辑器。

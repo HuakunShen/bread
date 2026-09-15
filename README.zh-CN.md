@@ -73,14 +73,24 @@ irm https://raw.githubusercontent.com/HuakunShen/bread/main/install.ps1 | iex
 
 ### Homebrew
 
+推荐使用 fully-qualified formula：
+
+```bash
+brew install HuakunShen/tap/bread
+```
+
+这个命令会自动添加 `HuakunShen/tap`，并只信任 `bread` 这个 formula。
+如果你的 Homebrew 要求显式信任，使用：
+
 ```bash
 brew tap HuakunShen/tap
+brew trust --formula HuakunShen/tap/bread
 brew install bread
 ```
 
-第一次 tap 之后，命令就是普通的 `brew install bread`。如果希望用户在
-完全没有 tap 的情况下直接执行这个命令，还需要把公式提交到
-`Homebrew/homebrew-core` 并通过审核；上游项目不能自动合并到官方仓库。
+如果希望用户在完全没有 tap 的情况下直接执行 `brew install bread`，还需要
+把公式提交到 `Homebrew/homebrew-core` 并通过审核；上游项目不能自动合并到
+官方仓库。
 
 ## 自升级
 

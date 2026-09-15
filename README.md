@@ -85,14 +85,22 @@ The default location is `%LOCALAPPDATA%\bread\bin`. Pass `-InstallDir` or set
 The immediately available tap path is:
 
 ```bash
+brew install HuakunShen/tap/bread
+```
+
+This fully qualified command automatically adds `HuakunShen/tap` and trusts only
+the `bread` formula. On Homebrew versions that require explicit trust, use:
+
+```bash
 brew tap HuakunShen/tap
+brew trust --formula HuakunShen/tap/bread
 brew install bread
 ```
 
 The tap is the correct distribution boundary for a prebuilt CLI. A plain
-`brew install bread` without first tapping requires a separate formula pull
-request accepted into `Homebrew/homebrew-core`; upstream cannot merge that
-formula automatically.
+`brew install bread` without a tap requires a separate formula pull request
+accepted into `Homebrew/homebrew-core`; upstream cannot merge that formula
+automatically.
 
 ## Upgrade
 
@@ -174,10 +182,10 @@ git push origin v0.2.0
 ```
 
 The tag workflow publishes six archives and `checksums.txt`. The Pages workflow
-uses the `github-pages` environment. The Homebrew workflow is disabled until
-the owner sets `HOMEBREW_TAP_ENABLED=true` and supplies a
-`HOMEBREW_TAP_TOKEN` secret that can write only to
-`HuakunShen/homebrew-tap`.
+uses the `github-pages` environment. The Homebrew workflow publishes `bread.rb`
+after a Release is published. It uses a `HOMEBREW_TAP_TOKEN` secret that can
+write only to `HuakunShen/homebrew-tap`; forks should set
+`HOMEBREW_TAP_ENABLED=true` only after configuring that secret.
 
 ## Install the navigation skill
 
