@@ -10,12 +10,9 @@ download_dir="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/bread-homebrew-formula"
 mkdir -p "$download_dir"
 trap 'rm -rf "$download_dir"' EXIT
 
-gh release download "$RELEASE_TAG" \
-  --repo "$RELEASE_REPOSITORY" \
-  --pattern bread.rb \
-  --dir "$download_dir"
-
 formula="$download_dir/bread.rb"
+release_url="https://github.com/${RELEASE_REPOSITORY}/releases/download/${RELEASE_TAG}/bread.rb"
+curl -fsSL --retry 3 --retry-delay 1 --output "$formula" "$release_url"
 test -f "$formula"
 content="$(base64 < "$formula" | tr -d '\n')"
 path="repos/$TAP_REPOSITORY/contents/Formula/bread.rb"
