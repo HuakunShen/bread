@@ -71,3 +71,57 @@ func TestRunRejectsInvalidArguments(t *testing.T) {
 		}
 	}
 }
+
+func TestRunSkillPrintsGuide(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run(context.Background(), []string{"skill"}, strings.NewReader(""), &stdout, &stderr)
+	if code != 0 || stderr.Len() != 0 {
+		t.Fatalf("run skill code=%d stderr=%q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "name: efficient-codebase-navigation") {
+		t.Fatalf("guide does not contain the skill frontmatter:\n%s", stdout.String())
+	}
+}
+
+func TestRunSkillAddInstallsIntoExplicitDirectory(t *testing.T) {
+	dir := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	code := run(context.Background(), []string{"skill", "--add", "--dir", dir}, strings.NewReader(""), &stdout, &stderr)
+	if code != 0 || stderr.Len() != 0 {
+		t.Fatalf("run skill --add code=%d stderr=%q", code, stderr.String())
+	}
+	path := filepath.Join(dir, "efficient-codebase-navigation", "SKILL.md")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("installed manifest missing: %v", err)
+	}
+	if !strings.Contains(string(content), "name: efficient-codebase-navigation") {
+		t.Fatalf("installed manifest is not the skill guide:\n%s", content)
+	}
+	if !strings.Contains(stdout.String(), path) {
+		t.Fatalf("output does not report the installed path:\n%s", stdout.String())
+	}
+}
+
+func TestRunSkillHelpExitsZero(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	if code := run(context.Background(), []string{"skill", "--help"}, strings.NewReader(""), &stdout, &stderr); code != 0 {
+		t.Fatalf("run skill --help code=%d, want 0", code)
+	}
+}
+
+func TestRunSkillRejectsInvalidArguments(t *testing.T) {
+	for _, args := range [][]string{
+		{"skill", "--add", "--target", "vim"},
+		{"skill", "--project"},
+		{"skill", "--target", "claude"},
+		{"skill", "--add", "--dir", t.TempDir(), "--project"},
+		{"skill", "--add", "--dir", t.TempDir(), "--target", "claude"},
+		{"skill", "extra"},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := run(context.Background(), args, strings.NewReader(""), &stdout, &stderr); code != 2 {
+			t.Errorf("run(%v) code=%d, want 2", args, code)
+		}
+	}
+}

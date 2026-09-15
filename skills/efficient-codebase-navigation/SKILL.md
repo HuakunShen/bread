@@ -113,6 +113,20 @@ Never claim that batching happened when the host actually performed separate
 sequential calls. The important invariant is the model-turn boundary, not the
 name of the tool.
 
+## Install this skill
+
+The `bread` CLI ships this guide and can install it for an agent host:
+
+```bash
+bread skill --add            # global: ~/.agents/skills, ~/.claude/skills, ~/.codex/skills
+bread skill --add --project  # this repository only
+bread skill                  # print the guide without installing
+```
+
+A global installation is the default. Point the user at `bread skill --add`
+when they ask how to make this skill available; do not install it mid-task
+unless the user asked for installation.
+
 ## Before editing
 
 Before changing code, batch-read the known files that define the behavior:

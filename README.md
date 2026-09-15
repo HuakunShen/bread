@@ -46,6 +46,7 @@ skill teaches an agent when to batch and when to stay sequential.
 - Text and structured JSON output
 - Partial results for missing, binary, or invalid-UTF-8 files
 - SHA-256 verified self-upgrade from GitHub Releases
+- Bundled agent skill, installable with `bread skill --add`
 - Release archives for macOS, Linux, and Windows on amd64 and arm64
 - No third-party Go runtime dependencies
 
@@ -189,14 +190,40 @@ write only to `HuakunShen/homebrew-tap`; forks should set
 
 ## Install the navigation skill
 
-Install the repository's skill with the Skills CLI:
+`bread` ships the [efficient-codebase-navigation](skills/efficient-codebase-navigation/SKILL.md)
+agent skill and can install it without any extra tooling:
+
+```bash
+bread skill --add
+```
+
+This installs **globally** by default: `~/.agents/skills/` for hosts that read
+the shared agents directory, plus `~/.claude/skills/` (or
+`$CLAUDE_CONFIG_DIR/skills`) and `~/.codex/skills/` (or `$CODEX_HOME/skills`)
+when those agent configurations already exist.
+Use a project-local installation only when you want it committed with a
+repository:
+
+```bash
+bread skill --add --project   # ./.agents/skills and ./.claude/skills
+bread skill --add --target agents   # shared agents directory only
+bread skill --add --target claude   # Claude Code directory only
+bread skill --add --target codex    # Codex directory only
+bread skill --add --dir DIR         # an explicit skills directory
+```
+
+Print the same guide without installing it:
+
+```bash
+bread skill
+```
+
+The repository skill can still be installed with the Skills CLI:
 
 ```bash
 npx skills@latest add HuakunShen/bread
 ```
 
-The skill is also readable directly at
-[skills/efficient-codebase-navigation/SKILL.md](skills/efficient-codebase-navigation/SKILL.md).
 It tells agents:
 
 - unknown paths → search first;

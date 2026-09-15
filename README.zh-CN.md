@@ -41,6 +41,7 @@ flowchart LR
 - 文本输出与结构化 JSON 输出
 - 某个文件失败时保留其它成功结果
 - 从 GitHub Release 下载并校验 SHA-256 后自升级
+- 内置 Agent Skill，可用 `bread skill --add` 安装
 - macOS、Linux、Windows 的 amd64 和 arm64 Release
 
 ## 安装
@@ -166,12 +167,39 @@ Homebrew 自动发布默认关闭。配置仓库变量
 
 ## 安装导航 Skill
 
+`bread` 内置了
+[efficient-codebase-navigation](skills/efficient-codebase-navigation/SKILL.md)
+Skill，直接用自身命令安装即可，不需要额外工具：
+
+```bash
+bread skill --add
+```
+
+默认是 **global 安装**：写入 `~/.agents/skills/`（通用 agents 目录），如果检测到
+Claude Code 配置目录，再写入 `~/.claude/skills/`（或 `$CLAUDE_CONFIG_DIR/skills`）；
+如果检测到 Codex 配置目录，还会写入 `~/.codex/skills/`（或 `$CODEX_HOME/skills`）。
+只有希望把 Skill 跟着仓库提交时，才需要 project 安装：
+
+```bash
+bread skill --add --project          # 安装到 ./.agents/skills 和 ./.claude/skills
+bread skill --add --target agents    # 只装通用 agents 目录
+bread skill --add --target claude    # 只装 Claude Code 目录
+bread skill --add --target codex     # 只装 Codex 目录
+bread skill --add --dir DIR          # 指定 skills 目录
+```
+
+只查看内容、不安装：
+
+```bash
+bread skill
+```
+
+也可以用 Skills CLI 安装仓库里的 Skill：
+
 ```bash
 npx skills@latest add HuakunShen/bread
 ```
 
-Skill 源文件在
-[skills/efficient-codebase-navigation/SKILL.md](skills/efficient-codebase-navigation/SKILL.md)。
 它指导 Agent：
 
 - 不知道路径 → 先搜索；

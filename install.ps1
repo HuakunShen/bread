@@ -61,6 +61,7 @@ try {
     if (($env:Path -split ";") -notcontains $InstallDir) {
         Write-Host "Add $InstallDir to PATH to run bread."
     }
+    Write-Host "Install the agent skill with: bread skill --add"
 }
 finally {
     Remove-Item -Recurse -Force $temporaryDirectory -ErrorAction SilentlyContinue

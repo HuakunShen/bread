@@ -80,3 +80,4 @@ case ":${PATH}:" in
   *:"$install_dir":*) ;;
   *) printf 'Add %s to PATH to run bread.\n' "$install_dir" ;;
 esac
+printf 'Install the agent skill with: %s/bread skill --add\n' "$install_dir"

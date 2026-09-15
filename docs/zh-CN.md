@@ -127,6 +127,20 @@ Unix 使用原子替换；Windows 等待当前进程退出后再替换。
 
 ## 5. Skills 安装
 
+`bread` 自带 `skill` 子命令，不需要额外的 Skills CLI：
+
+```bash
+bread skill            # 打印完整 Agent 指南
+bread skill --add      # 安装（默认 global）
+```
+
+默认 global 安装到 `~/.agents/skills/`，并在 Claude Code 配置目录存在时写入
+`~/.claude/skills/`（`$CLAUDE_CONFIG_DIR/skills` 优先），在 Codex 配置目录存在时
+写入 `~/.codex/skills/`（`$CODEX_HOME/skills` 优先）。需要把 Skill 提交到
+仓库时用 `--project`，需要指定目录时用 `--target agents|claude|codex` 或 `--dir DIR`。
+
+也可以用 Skills CLI 安装仓库里的 Skill：
+
 ```bash
 npx skills@latest add HuakunShen/bread
 ```

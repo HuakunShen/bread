@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
+	bread "github.com/HuakunShen/bread"
 	"github.com/HuakunShen/bread/internal/read"
+	"github.com/HuakunShen/bread/internal/skill"
 	"github.com/HuakunShen/bread/internal/update"
 	appversion "github.com/HuakunShen/bread/internal/version"
 )
@@ -19,8 +22,13 @@ func main() {
 }
 
 func run(ctx context.Context, args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
-	if len(args) > 0 && args[0] == "upgrade" {
-		return runUpgrade(ctx, args[1:], stdout, stderr)
+	if len(args) > 0 {
+		switch args[0] {
+		case "upgrade":
+			return runUpgrade(ctx, args[1:], stdout, stderr)
+		case "skill":
+			return runSkill(args[1:], stdout, stderr)
+		}
 	}
 
 	flags := flag.NewFlagSet("bread", flag.ContinueOnError)
@@ -108,6 +116,89 @@ func runUpgrade(ctx context.Context, args []string, stdout io.Writer, stderr io.
 		_, _ = fmt.Fprintf(stderr, "bread upgrade: %s\n", err)
 		return 1
 	}
+	return 0
+}
+
+func runSkill(args []string, stdout io.Writer, stderr io.Writer) int {
+	flags := flag.NewFlagSet("bread skill", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	add := flags.Bool("add", false, "install the bundled agent skill")
+	project := flags.Bool("project", false, "install into the current project instead of the user profile")
+	target := flags.String("target", string(skill.TargetAll), "agent skills directory: all, agents, claude, or codex")
+	dir := flags.String("dir", "", "install into this skills directory instead of the default locations")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+		return 2
+	}
+	if flags.NArg() != 0 {
+		_, _ = fmt.Fprintln(stderr, "bread skill: unexpected positional arguments")
+		return 2
+	}
+	if !*add {
+		if *project || *dir != "" || *target != string(skill.TargetAll) {
+			_, _ = fmt.Fprintln(stderr, "bread skill: --project, --target, and --dir require --add")
+			return 2
+		}
+		guide := bread.NavigationSkill
+		if !strings.HasSuffix(guide, "\n") {
+			guide += "\n"
+		}
+		_, _ = fmt.Fprint(stdout, guide)
+		return 0
+	}
+	if !skill.ValidTarget(*target) {
+		_, _ = fmt.Fprintf(stderr, "bread skill: invalid target %q (want all, agents, claude, or codex)\n", *target)
+		return 2
+	}
+	if *dir != "" && (*project || *target != string(skill.TargetAll)) {
+		_, _ = fmt.Fprintln(stderr, "bread skill: --dir cannot be combined with --project or --target")
+		return 2
+	}
+
+	options := skill.Options{
+		Content: bread.NavigationSkill,
+		Target:  skill.Target(*target),
+		Dir:     *dir,
+	}
+	if *dir == "" {
+		if *project {
+			workingDir, err := os.Getwd()
+			if err != nil {
+				_, _ = fmt.Fprintf(stderr, "bread skill: %s\n", err)
+				return 1
+			}
+			options.Scope = skill.ScopeProject
+			options.WorkingDir = workingDir
+		} else {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				_, _ = fmt.Fprintf(stderr, "bread skill: resolve home directory: %s\n", err)
+				return 1
+			}
+			options.Scope = skill.ScopeGlobal
+			options.HomeDir = home
+		}
+	}
+
+	paths, err := skill.Install(options)
+	if err != nil {
+		_, _ = fmt.Fprintf(stderr, "bread skill: %s\n", err)
+		return 1
+	}
+	location := "in the user profile"
+	switch {
+	case *project:
+		location = "in the current project"
+	case *dir != "":
+		location = "in " + *dir
+	}
+	_, _ = fmt.Fprintf(stdout, "Installed %s skill %s:\n", skill.Name, location)
+	for _, path := range paths {
+		_, _ = fmt.Fprintf(stdout, "  %s\n", path)
+	}
+	_, _ = fmt.Fprintln(stdout, "Reload your agent so it picks up the new skill.")
 	return 0
 }
 
